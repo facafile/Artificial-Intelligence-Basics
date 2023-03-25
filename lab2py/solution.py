@@ -96,7 +96,6 @@ def refutationResolution(clauses):
 
         for el in new:
             if len(el.value) == 1:
-                values = [o.value for o in all]
                 for el2 in all:
                     if [negate(el.value[0])] == el2.value:
                         backtrack(begining, end, Clause(["NIL"], el2, el))
@@ -106,6 +105,8 @@ def refutationResolution(clauses):
         sos = removeRedundant(sos, new, False)
         sos = removeRedundant(begining, sos, False)
         new = find_new(begining, sos, all)
+        if len(new) == 0:
+            new = find_new(sos,sos,all)
 
 
 def chooseRecipes(clauses, commands):
