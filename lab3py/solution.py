@@ -105,8 +105,8 @@ def probabilityOfY(dataset,y):
 
     return probability / len(dataset)
 class ID3:
-    def __init__(self):
-        pass
+    def __init__(self, limit=None):
+        self.limit = limit
 
     def fit(self, DS, parentDS, features, y):
         if len(DS) == 0:
@@ -115,7 +115,7 @@ class ID3:
         v = argmax(DS, -1)
         #print(DS, filterDataset(DS, len(header) - 1, v))
         #print(features)
-        if features == [] or test(DS,v):
+        if features == [] or test(DS,v) or (self.limit != None and y >= self.limit):
             return Leaf(v)
         #print(sorted(map(lambda x: informationalGain(DS, x), features),key=lambda x: (-x[0], x[1])))
         x = sorted(map(lambda y: informationalGain(DS, y), features),key=lambda z: (-z[0], z[1]))[0][1]
@@ -128,7 +128,7 @@ class ID3:
         s = features
         s.remove(x)
         for v in sorted(list(k)):
-            t = self.fit(filterDataset(DS, index, v), DS, s, y)
+            t = self.fit(filterDataset(DS, index, v), DS, s, y + 1)
             subtrees.append(((x,v), t))
         features.append(x)
         return Node(x, subtrees)
@@ -182,8 +182,11 @@ if __name__ == '__main__':
         for row in csvreader:
             testRows.append(row)
 
-    a = ID3()
-    tree = a.fit(rows,rows,header[:-1],"")
+    limit = None
+    if len(args) == 3:
+        limit = args[-1]
+    a = ID3(args)
+    tree = a.fit(rows,rows,header[:-1],0)
     print("[BRANCHES]:")
     DFS((None,tree),[])
 
