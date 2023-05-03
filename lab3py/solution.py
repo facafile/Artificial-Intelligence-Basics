@@ -21,7 +21,7 @@ def confMatrix(guess, dataset):
     for i in range(len(Y)):
         correct += matrix[i][i]
 
-    return matrix, round(correct / len(dataset),4)
+    return matrix, correct / len(dataset)
 
 
 def test(dataset, value):
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     rows = []
     args = sys.argv[1:]
 
-    with open("volleyball.csv", 'r') as file:
+    with open(args[0], 'r') as file:
         csvreader = csv.reader(file)
         header = next(csvreader)
 
@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
     testRows = []
 
-    with open("data.csv", 'r') as file:
+    with open(args[1], 'r') as file:
         csvreader = csv.reader(file)
         next(csvreader)
 
@@ -188,13 +188,12 @@ if __name__ == '__main__':
     DFS((None,tree),[])
 
     predicitions =a.predict(testRows, tree.subtrees, rows)
-    print(predicitions)
     print("[PREDICTIONS]: " + " ".join(predicitions))
 
     matrix, accuracy = confMatrix(predicitions,list(map(lambda x: x[-1],testRows)))
-    print("[ACCURACY]: " + str(accuracy))
+    print("[ACCURACY]: " + "{0:.5f}".format(accuracy))
     print("[CONFUSION_MATRIX]:")
     for el in matrix:
-        el = map(str,el)
+        el = list(map(str,el))
         print(" ".join(el))
 
