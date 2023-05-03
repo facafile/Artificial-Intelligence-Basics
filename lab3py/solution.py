@@ -5,6 +5,24 @@ import sys
 global header
 
 
+def confMatrix(guess, dataset):
+    Y = sorted(list(set(dataset + guess)))
+    matrix = []
+    correct = 0
+    for i in range(len(Y)):
+        row = []
+        for j in range(len(Y)):
+            row.append(0)
+        matrix.append(row)
+
+    for i in range(len(dataset)):
+        matrix[Y.index(dataset[i])][Y.index(guess[i])] += 1
+
+    for i in range(len(Y)):
+        correct += matrix[i][i]
+
+    return matrix, round(correct / len(dataset),4)
+
 
 def test(dataset, value):
     for el in dataset:
@@ -172,3 +190,11 @@ if __name__ == '__main__':
     predicitions =a.predict(testRows, tree.subtrees, rows)
     print(predicitions)
     print("[PREDICTIONS]: " + " ".join(predicitions))
+
+    matrix, accuracy = confMatrix(predicitions,list(map(lambda x: x[-1],testRows)))
+    print("[ACCURACY]: " + str(accuracy))
+    print("[CONFUSION_MATRIX]:")
+    for el in matrix:
+        el = map(str,el)
+        print(" ".join(el))
+
