@@ -115,7 +115,7 @@ class ID3:
         v = argmax(DS, -1)
         #print(DS, filterDataset(DS, len(header) - 1, v))
         #print(features)
-        if features == [] or test(DS,v) or (self.limit != None and y >= self.limit):
+        if features == [] or test(DS,v) or (self.limit != None and y >= int(self.limit)):
             return Leaf(v)
         #print(sorted(map(lambda x: informationalGain(DS, x), features),key=lambda x: (-x[0], x[1])))
         x = sorted(map(lambda y: informationalGain(DS, y), features),key=lambda z: (-z[0], z[1]))[0][1]
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     limit = None
     if len(args) == 3:
         limit = args[-1]
-    a = ID3(args)
+    a = ID3(limit)
     tree = a.fit(rows,rows,header[:-1],0)
     print("[BRANCHES]:")
     DFS((None,tree),[])
