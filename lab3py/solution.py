@@ -39,7 +39,7 @@ def argmax(dataset, index):
             dict[el[index]] += 1
         else:
             dict[el[index]] = 1
-    dict = sorted(dict.items(), key=lambda x: (x[1],x[0]), reverse=True)
+    dict = sorted(dict.items(), key=lambda x: (-x[1],x[0]))
     return dict[0][0]
 
 class Node:
@@ -96,6 +96,7 @@ class ID3:
             return Leaf(v)
         v = argmax(DS, -1)
         #print(DS, filterDataset(DS, len(header) - 1, v))
+        #print(features)
         if features == [] or test(DS,v):
             return Leaf(v)
         #print(sorted(map(lambda x: informationalGain(DS, x), features),key=lambda x: (-x[0], x[1])))
@@ -111,24 +112,33 @@ class ID3:
         for v in sorted(list(k)):
             t = self.fit(filterDataset(DS, index, v), DS, s, y)
             subtrees.append(((x,v), t))
-
+        features.append(x)
         return Node(x, subtrees)
 
-
-    def predict(self, dataset, tree):
+    def predict(self, dataset, tree, train):
         predicitions = []
         for el in dataset:
             helpTree = tree
+            filters = []
             while True:
                 index = header.index(helpTree[0][0][0])
+                unrecognised = True
                 for branch in helpTree:
                     if branch[0][1] == el[index]:
                         helpTree = branch[1]
+                        unrecognised = False
                         break
                 if type(helpTree) == Leaf:
                     predicitions.append(helpTree.cls)
                     break
+                if unrecognised:
+                    for filter in filters:
+                        train = filterDataset(train, filter[0], filters[1])
+                    predicitions.append(argmax(train, -1))
+                    break
+
                 helpTree = helpTree.subtrees
+                filters.append((index, el[index]))
 
         return predicitions
 
@@ -136,9 +146,9 @@ class ID3:
 if __name__ == '__main__':
     header = []
     rows = []
-    args = sys.argv[:-1]
+    args = sys.argv[1:]
 
-    with open(args[0], 'r') as file:
+    with open("volleyball.csv", 'r') as file:
         csvreader = csv.reader(file)
         header = next(csvreader)
 
@@ -147,7 +157,7 @@ if __name__ == '__main__':
 
     testRows = []
 
-    with open(args[1], 'r') as file:
+    with open("data.csv", 'r') as file:
         csvreader = csv.reader(file)
         next(csvreader)
 
@@ -159,5 +169,6 @@ if __name__ == '__main__':
     print("[BRANCHES]:")
     DFS((None,tree),[])
 
-    predicitions =a.predict(testRows, tree.subtrees)
+    predicitions =a.predict(testRows, tree.subtrees, rows)
+    print(predicitions)
     print("[PREDICTIONS]: " + " ".join(predicitions))
