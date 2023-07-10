@@ -25,7 +25,9 @@ class NN:
     def initialise_NN(self):
         for i in range(1,len(self.hLayers)):
             self.W.append(np.random.normal(0, 0.01, size=(self.hLayers[i - 1], self.hLayers[i])))
-            self.b.append(np.random.normal(0, 0.01, size=(self.hLayers[i], 1)))
+            self.b.append(np.random.normal(0, 0.01, size=(1, self.hLayers[i])))
+
+
 
 
     def transition_function(self, x):
@@ -34,7 +36,7 @@ class NN:
     def out(self, X):
         start = X
         for i in range(len(self.W)):
-            pom = np.add(np.dot(start,self.W[i]), self.b[i].T)
+            pom = np.add(np.dot(start,self.W[i]), self.b[i])
             if i < (len(self.W) - 1):
                 pom = self.transition_function(pom)
 
@@ -102,24 +104,24 @@ def mutate(d, K, p):
     XX = []
     XB = []
     for el in d.W:
-        xx = np.random.normal(0, K)
-        matrix = np.random.choice([xx, 0], size=el.shape, p=[p, 1 - p])
+        random.seed()
+        matrix = np.random.choice([random.gauss(0,K), 0], size=el.shape, p=[p, 1 - p])
         XX.append(np.add(matrix, el))
 
     for el in d.b:
-        xx = np.random.normal(0, K)
-        matrix = np.random.choice([xx, 0], size=el.shape, p=[p, 1 - p])
+        random.seed()
+        matrix = np.random.choice([random.gauss(0,K), 0], size=el.shape, p=[p, 1 - p])
         XB.append(np.add(matrix, el))
 
-    d.W = XX
-    d.b = XB
+    d.W = XX.copy()
+    d.b = XB.copy()
     return d
 
 
 def gen_alg(vel_pop, iter, elitism, p, K, X, Y, X2, Y2):
     P = np.array([NN(nn) for i in range(vel_pop)])
     for el in P:
-        el.error(X, Y)
+        el.errorVal = el.error(X,Y)
     for i in range(iter):
         new_P = elite(P, elitism)
         while len(new_P) < vel_pop:
@@ -129,8 +131,8 @@ def gen_alg(vel_pop, iter, elitism, p, K, X, Y, X2, Y2):
             new_P.append(d)
         P = new_P
         for el in P:
-            el.error(X, Y)
-        if ((i+1) % PRINT == 0 and i != 0):
+            el.errorVal = el.error(X, Y)
+        if ((i+1) % PRINT == 0):
             print("[Train error @" + str(i+1) + "]: " + str(elite(P,1)[0].errorVal))
     print("[Test error]: ", str(elite(P,1)[0].error(X2, Y2)))
 
@@ -193,6 +195,3 @@ if __name__ == '__main__':
     X2 = np.matrix([[float(x) for x in sublist] for sublist in X2])
 
     gen_alg(popsize, iter, elitism, p, K, X, Y, X2, Y2)
-
-
-
